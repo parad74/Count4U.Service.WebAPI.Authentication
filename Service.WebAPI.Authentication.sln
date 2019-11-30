@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29021.104
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebAPI", "WebAPI", "{26E7B67A-B467-4437-8EAF-C2BF229EAFB7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Count4U.Service.WebAPI.Authentication", "src\Count4U.Service.WebAPI.Authentication\Count4U.Service.WebAPI.Authentication.csproj", "{EF490365-0790-49BA-A47A-DF90667EAEE7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF490365-0790-49BA-A47A-DF90667EAEE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF490365-0790-49BA-A47A-DF90667EAEE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF490365-0790-49BA-A47A-DF90667EAEE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF490365-0790-49BA-A47A-DF90667EAEE7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EF490365-0790-49BA-A47A-DF90667EAEE7} = {26E7B67A-B467-4437-8EAF-C2BF229EAFB7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F674C702-F70D-472F-AD11-44674E93E9FE}
+	EndGlobalSection
+EndGlobal

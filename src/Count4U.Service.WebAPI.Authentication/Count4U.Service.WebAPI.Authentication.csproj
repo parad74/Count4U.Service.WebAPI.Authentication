@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	  <!--<PublishSingleFile>true</PublishSingleFile>-->
+	  <!--<LangVersion>8</LangVersion>-->
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<AssemblyName>Count4U.Service.WebAPI.Authentication</AssemblyName>
+		<RootNamespace>Count4U.Service.WebAPI.Authentication</RootNamespace>
+		<DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+		<DockerfileContext>..\..</DockerfileContext>
+		<DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<Compile Remove="App_Data\**" />
+		<Compile Remove="ClientSources\**" />
+		<Content Remove="App_Data\**" />
+		<Content Remove="ClientSources\**" />
+		<None Include="ClientSources\**" CopyToPublishDirectory="Always" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <EmbeddedResource Remove="App_Data\**" />
+	  <EntityDeploy Remove="App_Data\**" />
+	  <None Remove="App_Data\**" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Count4U.Service.Model" Version="1.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.0-preview3.19555.2" />
+		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
+		<PackageReference Include="Ben.BlockingDetector" Version="0.0.3" />
+	  <PackageReference Include="CoreX.Extensions.Http" Version="0.2.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authorization.Policy" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.1.0-preview3.19555.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.1.0-preview3.19555.2" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.0-preview3.19555.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0-preview3.19555.2" />
+
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0-preview3.19554.8" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
+   
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0-preview3.19553.2" />
+
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.0-preview3.19553.2" />
+	  
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0-preview3.19558.8" />
+
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0-preview3.19553.2" />
+		<!--<PackageReference Include="Unity" Version="5.11.1" />
+		<PackageReference Include="Unity.Abstractions" Version="5.11.1" />
+		<PackageReference Include="Unity.Container" Version="5.11.1" />
+		<PackageReference Include="Unity.Microsoft.DependencyInjection" Version="5.10.2" />
+		<PackageReference Include="Unity.ServiceLocation" Version="5.11.1" />-->
+	</ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
+</Project>
