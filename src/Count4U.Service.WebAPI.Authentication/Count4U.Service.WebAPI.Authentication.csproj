@@ -12,7 +12,7 @@
 	<PropertyGroup>
 		<AssemblyName>Count4U.Service.WebAPI.Authentication</AssemblyName>
 		<RootNamespace>Count4U.Service.WebAPI.Authentication</RootNamespace>
-		<DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<DockerfileContext>..\..</DockerfileContext>
 		<DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
 	</PropertyGroup>

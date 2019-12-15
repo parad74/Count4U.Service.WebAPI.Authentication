@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   count4u.service.webapi.authentication:
-    image: ${DOCKER_REGISTRY-}count4uservicewebapiauthentication
+    image: ${DOCKER_REGISTRY-}count4authentication
     build:
       context: .
       dockerfile: src\Count4U.Service.WebAPI.Authentication\Dockerfile
