@@ -190,7 +190,7 @@ namespace Count4U.Service.Core.Server
 			app.UseSwagger();
 			app.UseSwaggerUI(c =>
 			{
-				c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET Core 3.0 web API v1");
+				c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET Core 3.1 web API v1");
 				//c.RoutePrefix = string.Empty;
 			});
 
