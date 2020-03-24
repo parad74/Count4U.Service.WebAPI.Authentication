@@ -1,18 +1,10 @@
 ﻿using Count4U.Service.Model;
-using Count4U.Service.Core.Server.Data;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Count4U.Service.Common;
-using Count4U.Service.Shared;
 using Count4U.Service.Common.Urls;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
 
@@ -26,15 +18,10 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
     {
         private static UserModel LoggedOutUser = new UserModel { IsAuthenticated = false };
 
-		//      private readonly UserManager<ApplicationUser> _userManager;
-		//private readonly IPCBIContext _pcbiContext;
 		private readonly ILogger<ClaimController> _logger;
-		public ClaimController(ILoggerFactory loggerFactory/*UserManager<ApplicationUser> userManager, IPCBIContext pcbiContext*/)
+		public ClaimController(ILoggerFactory loggerFactory)
         {
 			this._logger = loggerFactory.CreateLogger<ClaimController>();
-			//_userManager = userManager;
-			//_pcbiContext = pcbiContext;
-
 		}
 
 		[HttpGet(WebApiAuthenticationClaim.GetClaims)]
@@ -64,7 +51,6 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		[HttpGet(WebApiAuthenticationClaim.GetClaimConvertItems)]
 		public ActionResult<IEnumerable<ClaimConvertItem>> GetClaimConvertItems()
 		{
-		//	string customerCode = _pcbiContext.CustomerCode;	   //test
 			if (this.HttpContext == null)
 				return BadRequest();
 			if (this.HttpContext.User == null)
@@ -123,7 +109,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 	
 		[HttpGet(WebApiAuthenticationClaim.GetClaimValue)]
-		public ActionResult<string> GetClaimValue([FromRoute] string key)
+		public ActionResult<string> GetClaimValue([FromRoute] string key)     //Не используйте, [FromRoute]когда значения могут содержать %2f(то есть /). %2fне будет неэкранированный к /. Используйте, [FromQuery]
 		{
 			if (this.HttpContext == null)
 				return Ok("");

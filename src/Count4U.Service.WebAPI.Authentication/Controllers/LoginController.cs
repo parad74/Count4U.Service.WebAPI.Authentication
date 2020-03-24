@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Count4U.Service.Common;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
 using Count4U.Service.Common.Urls;
+using Count4U.Service.Contract;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -27,7 +29,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly ILogger<LoginController> _logger;
 
-		public LoginController(ILoggerFactory loggerFactory, 
+		public LoginController(ILoggerFactory loggerFactory,
 			IConfiguration configuration,
 			SignInManager<ApplicationUser> signInManager,
 			UserManager<ApplicationUser> userManager)
@@ -47,11 +49,11 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		[HttpPost(WebApiAuthenticationLogin.PostLogin)]
 		[ServiceFilter(typeof(ControllerTraceServiceFilter))]
 		//[FeatureGate(C4UFeatureFlags.FeatureA)]
-		public async Task<IActionResult> Login([FromBody] LoginModel login)
+		public async Task<LoginResult> LoginAsync([FromBody] LoginModel login)
 		{
 			if (login == null)
 			{
-				return Ok(new LoginResult { Successful = false, Error = "LoginModel is null" });
+				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "LoginModel is null " };
 			}
 			//TEST 1
 			//_logger.ControllerOnStart(HttpContext, RouteData);
@@ -65,7 +67,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//2 шаг - если нет отправляем неудачно, (надо на регистрацию отправлять если что)
 			if (correctuser == false)
 			{
-				return Ok(new LoginResult { Successful = false, Error = "Username and password are invalid." });
+				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "Username and password are invalid. " };
 			}
 			//3 шаг - сохраняетм данные, что бы потом читать 
 			//var claims = new[]
@@ -78,11 +80,23 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			var claims = new List<Claim>();
 			//имя пользователя
 			claims.Add(new Claim(ClaimTypes.Name, login.Email));
+
+
+
+			//ТЕСТ работает
+			//var have = claims.Any(c => c.Type == "manager");
+			//if (have == false) 
+			//{
+			//	await _signInManager.UserManager.AddClaimAsync(user, new Claim("manager", "full"));
+			//}
+
 			//роли пользователя
 			foreach (var role in roles)
 			{
 				claims.Add(new Claim(ClaimTypes.Role, role));
 			}
+
+
 
 			//тестовый вариант все настройки из конфига
 			{
@@ -116,7 +130,18 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 					claims.Add(new Claim(ClaimEnum.BranchCode.ToString(), profileModel.BranchCode));
 					claims.Add(new Claim(ClaimEnum.InventorCode.ToString(), profileModel.InventorCode));
 					claims.Add(new Claim(ClaimEnum.DBPath.ToString(), profileModel.DBPath));
-					
+
+				}
+			}
+
+			//from AspNetUserClaims , аналог ролей
+			var userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
+			foreach (var userClaim in userClaims)
+			{
+				var have = claims.Any(c => c.Type == userClaim.Type);
+				if (have == false)
+				{
+					claims.Add(userClaim);
 				}
 			}
 
@@ -137,9 +162,63 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//Константа ISSUER представляет издателя токена. Здесь можно определить любое название. AUDIENCE представляет потребителя токена - опять же может быть любая строка, но в данном случае указан адрес текущего приложения.
 			//	Константа KEY хранит ключ, который будет применяться для создания токена.
 
-			//_logger.ControllerOnEnd(HttpContext, RouteData);
-			return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
+			return new LoginResult { Successful = SuccessfulEnum.Successful, Token = new JwtSecurityTokenHandler().WriteToken(token) };
 		}
+
+		//[HttpPost]
+		//[AllowAnonymous]
+		//[ValidateAntiForgeryToken]
+		//public async Task<LoginResult> ForgotPassword(ForgotPasswordModel model)
+		//{
+
+		//	var user = await _userManager.FindByEmailAsync(model.Email);
+		//	if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+		//	{
+		//		// пользователь с данным email может отсутствовать в бд
+		//		// тем не менее мы выводим стандартное сообщение, чтобы скрыть 
+		//		// наличие или отсутствие пользователя в бд
+		//		return new LoginResult { Successful = SuccessfulEnum.ForgotPassword, Error = "Forgot Password Confirmation. " };
+		//	}
+
+		//	var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+		//	var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+		//	EmailService emailService = new EmailService();
+		//	await emailService.SendEmailAsync(model.Email, "Reset Password",
+		//		$"To reset your password, follow the link: <a href='{callbackUrl}'>link</a>");
+		//	return new LoginResult { Successful = SuccessfulEnum.ForgotPassword, Error = "Forgot Password Confirmation. " };
+
+		//}
+
+		//[HttpGet]
+		//[AllowAnonymous]
+		//public LoginResult ResetPassword(string code = null)
+		//{
+		//	if (code == null) return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "Error Reset Password" };
+		//	return new LoginResult { Successful = SuccessfulEnum.Successful };
+		//}
+
+		//[HttpPost]
+		//[AllowAnonymous]
+		//[ValidateAntiForgeryToken]
+		//public async Task<LoginResult> ResetPassword(ResetPasswordModel model)
+		//{
+		//	var user = await _userManager.FindByEmailAsync(model.Email);
+		//	if (user == null)
+		//	{
+		//		return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User not found" };
+		//	}
+		//	var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+		//	if (result.Succeeded)
+		//	{
+		//		return new LoginResult { Successful = SuccessfulEnum.Successful };
+		//	}
+		//	string error = "";
+		//	foreach (var err in result.Errors)
+		//	{
+		//		error += err.Description;
+		//	}
+		//	return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
+		//}
 	}
 }
 

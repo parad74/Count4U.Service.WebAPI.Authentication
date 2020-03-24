@@ -9,15 +9,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Count4U.Service.Common;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 using Count4U.Service.Common.Urls;
+using Count4U.Service.Contract;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -33,8 +31,6 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<AccountsController> _logger;
 
-		//	private readonly ILogger<ApplicationUser> _userManagerLogger;
-
 		public AccountsController(ILoggerFactory loggerFactory,
 			IConfiguration configuration, 
 			UserManager<ApplicationUser> userManager,
@@ -47,37 +43,33 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 							  throw new ArgumentNullException(nameof(userManager));
 			this._signInManager = signInManager ??
 							  throw new ArgumentNullException(nameof(signInManager));
-			//_userManagerLogger = userManagerLogger;
 
 		}
 
 		[AllowAnonymous]
 		[HttpPost(WebApiAuthenticationAccounts.PostRegister)]
-		public async Task<IActionResult> Post([FromBody]RegisterModel model)
+		public async Task<RegisterResult> PostAsync([FromBody]RegisterModel model)
 		{
 			if (model == null)
 			{
-				List<string> errors = new List<string>() { "RegisterModel is null" };
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
+				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = "RegisterModel is null " };
 			}
 
 			ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
 			if (user != null)
 			{
-				List<string> errors = new List<string>() { "User with the same e-mail there is" };
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
+				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = "User with the same e-mail there is " };
  			}
 
 			var newUser = new ApplicationUser { UserName = model.Email, Email = model.Email };
 
 			var result = await _userManager.CreateAsync(newUser, model.Password);
 
-			if (!result.Succeeded)
+			if (result.Succeeded == false)
 			{
 				var errors = result.Errors.Select(x => x.Description);
-
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
-
+				var error = string.Join(" .", errors);
+				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = error };
 			}
 
 			// Add all new users to the User role
@@ -87,27 +79,46 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			if (newUser.Email.StartsWith("admin"))
 			{
 				await _userManager.AddToRoleAsync(newUser, "Admin");
+				//test 
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("admin", "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("useradmin", "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("manager", "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("monitor", "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("service", "full"));
 			}
 
-			return Ok(new RegisterResult { Successful = true });
+			if (newUser.Email.StartsWith("manager")) 
+			{
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("manager", "full"));
+			}
+
+			if (newUser.Email.StartsWith("monitor")) 
+			{
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("monitor", "full"));
+			}
+
+			if (newUser.Email.StartsWith("service"))
+			{
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("service", "full"));
+			}
+
+			return new RegisterResult { Successful = SuccessfulEnum.Successful};
 		}
 
 
 		[Authorize]
 		[HttpPost(WebApiAuthenticationAccounts.PostProfile)]
-		public async Task<IActionResult> PostProfile([FromBody]ProfileModel model)
+		public async Task<RegisterResult> PostProfileAsync([FromBody]ProfileModel model)
 		{
 			if (model == null)
 			{
-				List<string> errors = new List<string>() { " ProfileModel is null" };
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
+				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = " ProfileModel is null " };
 			}
 
 			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);
 			if (user != null)
 			{
-				List<string> errors = new List<string>() { "Can't get user from db" };
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
+				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = "Can't get user from db "  };
 			}
 
 			user.DataServerAddress = model.DataServerAddress != null ? model.DataServerAddress : "";
@@ -121,32 +132,31 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 			var result = await _userManager.UpdateAsync(user);
 
-			if (!result.Succeeded)
+			if (result.Succeeded == false)
 			{
 				var errors = result.Errors.Select(x => x.Description);
-
-				return Ok(new RegisterResult { Successful = false, Errors = errors });
-
+				 var error = string.Join(" .", errors);
+					return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = error };
 			}
 
-			return Ok(new RegisterResult { Successful = true });
+			return new RegisterResult { Successful = SuccessfulEnum.Successful  };
 		}
 
 		[Authorize]
 		[HttpPost(WebApiAuthenticationAccounts.PostUpdateprofile)]
 		//[ServiceFilter(typeof(ControllerTraceServiceFilter))]
 		//[FeatureGate(C4UFeatureFlags.FeatureA)]
-		public async Task<IActionResult> UpdateProfile([FromBody]ProfileModel profileModel)
+		public async Task<LoginResult> UpdateProfileAsync([FromBody]ProfileModel profileModel)
 		{
 			if (profileModel == null)
 			{
-				return Ok(new LoginResult { Successful = false, Error = "ProfileModel is null" });
+				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "ProfileModel is null " };
 			}
 
 			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
 			if (user == null)
 			{
-				return Ok(new LoginResult { Successful = false, Error = "User is null" });
+				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
 			}
 			user.DataServerAddress = profileModel.DataServerAddress != null ? profileModel.DataServerAddress : "";
 			//user.DataServerPort = profileModel.DataServerPort != null ? profileModel.DataServerPort : "";
@@ -159,12 +169,11 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 			var result = await _userManager.UpdateAsync(user);
 
-			if (!result.Succeeded)
+			if (result.Succeeded == false)
 			{
 				var errors = result.Errors.Select(x => x.Description);
-
-				return Ok(new LoginResult { Successful = false, Error = "can't update ApplicationUser" });
-
+				var error = string.Join(" ." , errors);
+				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
 			}
 
 			var userClaims = this.HttpContext.User.Claims;
@@ -228,9 +237,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//issuer- Если у вас есть несколько клиентских приложений, которые могут взаимодействовать с вашим API, может быть полезно включить указание на целевую аудиторию в самом токене.
 			//Константа ISSUER представляет издателя токена. Здесь можно определить любое название. AUDIENCE представляет потребителя токена - опять же может быть любая строка, но в данном случае указан адрес текущего приложения.
 			//	Константа KEY хранит ключ, который будет применяться для создания токена.
-
-			//_logger.ControllerOnEnd(HttpContext, RouteData);
-			return Ok(new LoginResult { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
+			return new LoginResult { Successful = SuccessfulEnum.Successful, Token = new JwtSecurityTokenHandler().WriteToken(token) };
 		}
 
 		//===
@@ -277,6 +284,32 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			});
 		}
 
-		
+		[Authorize]
+		[HttpPost(WebApiAuthenticationAccounts.PostChangePassword)]
+		public async Task<ChangePasswordResult> ChangePassword([FromBody]ChangePasswordModel changePasswordModel)
+		{
+			if (changePasswordModel == null)
+			{
+				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = "changePasswordModel is null " };
+			}
+
+			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
+			if (user == null)
+			{
+				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
+			}
+			var result = await _userManager.ChangePasswordAsync(user, changePasswordModel.OldPassword, changePasswordModel.NewPassword);
+            if (result.Succeeded == false)
+			{ 
+				var errors = result.Errors.Select(x => x.Description);
+				var error = string.Join(" ." , errors);
+				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
+			}
+		    
+			await _signInManager.SignInAsync(user, isPersistent: false);
+            _logger.LogInformation("User changed their password successfully.");
+           return new ChangePasswordResult { Successful = SuccessfulEnum.Successful };
+
+		}
 	}
 }

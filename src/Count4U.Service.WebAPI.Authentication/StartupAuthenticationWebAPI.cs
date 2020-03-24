@@ -176,8 +176,11 @@ namespace Count4U.Service.Core.Server
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env , ILoggerFactory loggerFactory)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env , ILoggerFactory loggerFactory/*, Microsoft.AspNetCore.Hosting.IApplicationLifetime applicationLifetime*/)
         {
+			//applicationLifetime.ApplicationStarted.Register(OnAppStarted);
+			//applicationLifetime.ApplicationStopping.Register(OnAppStopping);
+			//applicationLifetime.ApplicationStopped.Register(OnAppStopped);
 			app.UseResponseCompression();
 			Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger<StartupAuthenticationWebAPI>();
 			if (env.IsDevelopment())
@@ -233,7 +236,7 @@ namespace Count4U.Service.Core.Server
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			services.AddScoped<IPCBIContext, PCBIContext>();
 			services.AddScoped<IEmailSender, EmailSender>();
-			services.AddSingleton<RavenDBIdUtil>();
+		
 
 			//services.AddScoped<IWeatherForecastWebApi, WeatherForecastWebApi>();
 
@@ -242,7 +245,15 @@ namespace Count4U.Service.Core.Server
 				.AddControllersAsServices(); // Add the controllers to DI
 
 		}
-   	}
+
+		private void OnAppStopped()
+		{
+			//this code is called when the application stops
+		}
+
+	}
+
+
 
 }
 
