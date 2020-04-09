@@ -15,7 +15,6 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Count4U.Service.Common.Urls;
-using Count4U.Service.Contract;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -108,17 +107,17 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 		[Authorize]
 		[HttpPost(WebApiAuthenticationAccounts.PostProfile)]
-		public async Task<RegisterResult> PostProfileAsync([FromBody]ProfileModel model)
+		public async Task<ProfileResult> PostProfileAsync([FromBody]ProfileModel model)
 		{
 			if (model == null)
 			{
-				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = " ProfileModel is null " };
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful , Error = " ProfileModel is null " };
 			}
 
 			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);
 			if (user != null)
 			{
-				return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = "Can't get user from db "  };
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful , Error = "Can't get user from db "  };
 			}
 
 			user.DataServerAddress = model.DataServerAddress != null ? model.DataServerAddress : "";
@@ -136,27 +135,27 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			{
 				var errors = result.Errors.Select(x => x.Description);
 				 var error = string.Join(" .", errors);
-					return new RegisterResult { Successful = SuccessfulEnum.NotSuccessful , Error = error };
+					return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful , Error = error };
 			}
 
-			return new RegisterResult { Successful = SuccessfulEnum.Successful  };
+			return new ProfileResult { Successful = SuccessfulEnum.Successful  };
 		}
 
 		[Authorize]
 		[HttpPost(WebApiAuthenticationAccounts.PostUpdateprofile)]
 		//[ServiceFilter(typeof(ControllerTraceServiceFilter))]
 		//[FeatureGate(C4UFeatureFlags.FeatureA)]
-		public async Task<LoginResult> UpdateProfileAsync([FromBody]ProfileModel profileModel)
+		public async Task<ProfileResult> UpdateProfileAsync([FromBody]ProfileModel profileModel)
 		{
 			if (profileModel == null)
 			{
-				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "ProfileModel is null " };
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "ProfileModel is null " };
 			}
 
 			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
 			if (user == null)
 			{
-				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
 			}
 			user.DataServerAddress = profileModel.DataServerAddress != null ? profileModel.DataServerAddress : "";
 			//user.DataServerPort = profileModel.DataServerPort != null ? profileModel.DataServerPort : "";
@@ -173,7 +172,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			{
 				var errors = result.Errors.Select(x => x.Description);
 				var error = string.Join(" ." , errors);
-				return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
 			}
 
 			var userClaims = this.HttpContext.User.Claims;
@@ -237,7 +236,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//issuer- Если у вас есть несколько клиентских приложений, которые могут взаимодействовать с вашим API, может быть полезно включить указание на целевую аудиторию в самом токене.
 			//Константа ISSUER представляет издателя токена. Здесь можно определить любое название. AUDIENCE представляет потребителя токена - опять же может быть любая строка, но в данном случае указан адрес текущего приложения.
 			//	Константа KEY хранит ключ, который будет применяться для создания токена.
-			return new LoginResult { Successful = SuccessfulEnum.Successful, Token = new JwtSecurityTokenHandler().WriteToken(token) };
+			return new ProfileResult { Successful = SuccessfulEnum.Successful, Token = new JwtSecurityTokenHandler().WriteToken(token) };
 		}
 
 		//===
