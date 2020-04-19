@@ -1,32 +1,28 @@
-using Count4U.Service.Model;
 using Count4U.Service.Core.Server.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using RestApi.Server.Data;
 using System;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
-using Count4U.Service.Common.Filter;
 using Count4U.Service.Common;
-using Count4U.Service.Core.Server.Settings;
-using Microsoft.Extensions.Options;
 //using Unity;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
 using Count4U.Service.Shared;
+using Monitor.Service.Model;
+using Service.Filter;
 
 namespace Count4U.Service.Core.Server
 {

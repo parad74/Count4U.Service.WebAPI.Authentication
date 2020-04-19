@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Count4U.Service.Common.Urls;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
+using Service.Model;
+using Monitor.Service.Urls;
+using Monitor.Service.Model;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {

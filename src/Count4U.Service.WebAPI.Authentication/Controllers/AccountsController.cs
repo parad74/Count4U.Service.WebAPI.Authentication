@@ -14,7 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
-using Count4U.Service.Common.Urls;
+using Monitor.Service.Model;
+using Monitor.Service.Urls;
+ using Count4U.Service.Shared;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {

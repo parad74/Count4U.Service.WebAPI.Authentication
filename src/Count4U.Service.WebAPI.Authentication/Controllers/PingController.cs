@@ -1,6 +1,6 @@
-﻿using Count4U.Service.Common.Urls;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Monitor.Service.Urls;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {

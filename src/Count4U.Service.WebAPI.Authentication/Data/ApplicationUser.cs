@@ -1,11 +1,11 @@
-﻿using Count4U.Service.Common;
-using Count4U.Service.Model;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Monitor.Service.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+ using Count4U.Service.Shared;
 
 namespace Count4U.Service.Core.Server.Data
 {

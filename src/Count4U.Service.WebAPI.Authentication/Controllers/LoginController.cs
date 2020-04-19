@@ -15,7 +15,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Count4U.Service.Common;
 using Count4U.Service.Common.Filter.ActionFilterFactory;
-using Count4U.Service.Common.Urls;
+using Monitor.Service.Urls;
+using Monitor.Service.Model;
+ using Count4U.Service.Shared;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
