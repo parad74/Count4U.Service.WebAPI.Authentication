@@ -91,10 +91,13 @@ namespace Count4U.Service.Core.Server
 			//services.AddDbContext<CustomerContext>(options => options.UseSqlite(authConnection));
 			//services.AddDbContext<CustomerContext>(options => options.UseSqlite("DataSource=:memory:"));
 
+			  //services.AddDbContext<ApplicationDbContext>(options => 
+     //   options.UseSqlite("Data Source=userc4u.db"));
 
 			//Setting up ApplicationDbContext
 			services.AddDbContext<ApplicationDbContext>(options =>
-			options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+			options.UseSqlite(@"Data Source=App_Data\userc4u.db"));
+			//options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 	   			services.AddDefaultIdentity<ApplicationUser>(opts => {    //TODO добавить свой класс наследник от 	IdentityUser и add IdentityRole	   services.AddDefaultIdentity<IdentityUser, IdentityRole>()  
 				opts.Password.RequiredLength = 5;   // минимальная длина
 				opts.Password.RequireNonAlphanumeric = false;   // требуются ли не алфавитно-цифровые символы

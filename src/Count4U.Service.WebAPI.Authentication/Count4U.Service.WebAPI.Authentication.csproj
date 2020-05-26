@@ -82,6 +82,10 @@
     <ProjectReference Include="..\..\..\Count4U.Service.Core\src\Monitor.Service.Shared\Monitor.Service.Shared.csproj" />
   </ItemGroup>
 
-
+	<ItemGroup>
+	<Content Include="App_Data\userc4u.db">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	</ItemGroup>
 	
 </Project>
