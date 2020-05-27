@@ -19,6 +19,9 @@ namespace Count4U.Service.Core.Server
 		 .Build();
  
     }
+
+    //ngrok http 52025 -host-header=localhost:52025
+    //http://414b1a82.ngrok.io/swagger/index.html
     //http://blazorhelpwebsite.com/Blog/tabid/61/EntryId/4366/Deploying-Your-Blazor-App-Using-Azure-Pipelines.aspx
 
     //https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/april/data-points-ef-core-in-a-docker-containerized-app
