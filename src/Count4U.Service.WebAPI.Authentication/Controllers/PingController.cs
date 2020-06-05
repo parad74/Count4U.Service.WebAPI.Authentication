@@ -6,6 +6,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
 	[ApiController]
 	[Produces("application/json")]
+	[Consumes("application/json")]
 	public class PingController : Controller
 	{
 		[HttpGet]

@@ -72,6 +72,7 @@
 	</ItemGroup>
 
   <ItemGroup>
+    <Folder Include="App_Data\" />
     <Folder Include="Data\Test\" />
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\js\" />
@@ -81,11 +82,5 @@
     <ProjectReference Include="..\..\..\Count4U.Service.Core\src\Count4U.Service.Common\Count4U.Service.Common.csproj" />
     <ProjectReference Include="..\..\..\Count4U.Service.Core\src\Monitor.Service.Shared\Monitor.Service.Shared.csproj" />
   </ItemGroup>
-
-	<ItemGroup>
-	<Content Include="App_Data\userc4u.db">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
-	</ItemGroup>
 	
 </Project>

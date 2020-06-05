@@ -22,20 +22,22 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
 	[ApiController]
 	[Produces("application/json")]
+	[Consumes("application/json")]
 	[ServiceFilter(typeof(ControllerTraceServiceFilter))]
 	public class AccountsController : ControllerBase
 	{
-		private static UserModel LoggedOutUser = new UserModel { IsAuthenticated = false };
+		private static UserModel LoggedOutUser = new UserModel { IsAuthenticated = false , Email=""};
 
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<AccountsController> _logger;
 
-		public AccountsController(ILoggerFactory loggerFactory,
-			IConfiguration configuration, 
-			UserManager<ApplicationUser> userManager,
-			SignInManager<ApplicationUser> signInManager)
+		public AccountsController(ILoggerFactory loggerFactory
+			, IConfiguration configuration
+			, UserManager<ApplicationUser> userManager
+			, SignInManager<ApplicationUser> signInManager
+		)
 		{
 			this._logger = loggerFactory.CreateLogger<AccountsController>();
 			this._configuration = configuration ??
@@ -64,7 +66,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 			var newUser = new ApplicationUser { UserName = model.Email, Email = model.Email };
 
-			var result = await _userManager.CreateAsync(newUser, model.Password);
+			IdentityResult result = await _userManager.CreateAsync(newUser, model.Password);
 
 			if (result.Succeeded == false)
 			{
@@ -77,58 +79,112 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			await _userManager.AddToRoleAsync(newUser, "User");
 
 			// Add new users whose email starts with 'admin' to the Admin role
+			//		builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Owner", NormalizedName = "OWNER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //users and roles
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() }); //For all profiles, process, customers params
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Monitor", NormalizedName = "MONITOR", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //metriks 
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Context", NormalizedName = "CONTEXT", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });   //profile view
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Worker", NormalizedName = "WORKER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	   //Inventor in field
+			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Profile", NormalizedName = "PROFILE", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	  //my Profile Edit
+
+				//test 
+			if (newUser.Email.StartsWith("parad74@mail.ru") )
+			{
+				await _userManager.AddToRoleAsync(newUser, "Owner");
+				await _userManager.AddToRoleAsync(newUser, "Admin");
+				await _userManager.AddToRoleAsync(newUser, "Manager");
+				await _userManager.AddToRoleAsync(newUser, "Monitor");
+				await _userManager.AddToRoleAsync(newUser, "Context");
+				await _userManager.AddToRoleAsync(newUser, "Worker");
+				await _userManager.AddToRoleAsync(newUser, "Profile");
+				//test 
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.owner.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.admin.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.manager.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.monitor.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.context.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.worker.ToString(), "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.profile.ToString(), "full"));
+			}
+
 			if (newUser.Email.StartsWith("admin"))
 			{
 				await _userManager.AddToRoleAsync(newUser, "Admin");
-				//test 
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("admin", "full"));
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("useradmin", "full"));
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("manager", "full"));
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("monitor", "full"));
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("service", "full"));
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.admin.ToString(), "full"));
 			}
 
 			if (newUser.Email.StartsWith("manager")) 
 			{
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("manager", "full"));
+				await _userManager.AddToRoleAsync(newUser, "Manager");
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.manager.ToString(), "full"));
 			}
 
 			if (newUser.Email.StartsWith("monitor")) 
 			{
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("monitor", "full"));
+				await _userManager.AddToRoleAsync(newUser, "Monitor");
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.monitor.ToString(), "full"));
 			}
 
-			if (newUser.Email.StartsWith("service"))
+			if (newUser.Email.StartsWith("context")) 
 			{
-				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim("service", "full"));
+				await _userManager.AddToRoleAsync(newUser, "Context");
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.context.ToString(), "full"));
 			}
 
-			return new RegisterResult { Successful = SuccessfulEnum.Successful};
+			if (newUser.Email.StartsWith("worker")) 
+			{
+				await _userManager.AddToRoleAsync(newUser, "Worker");
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.worker.ToString(), "full"));
+			}
+
+			if (newUser.Email.StartsWith("profile")) 
+			{
+				await _userManager.AddToRoleAsync(newUser, "Profile");
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.profile.ToString(), "full"));
+			}
+
+			if (string.IsNullOrWhiteSpace(newUser.Id) == false)
+			{
+				await _signInManager.UserManager.AddClaimAsync(newUser, new Claim(ClaimEnum.ApplicationUserId.ToString(), newUser.Id));
+				return new RegisterResult { Successful = SuccessfulEnum.Successful, ApplicationUserID =  newUser.Id};
+			}
+			else
+			 {
+				return new RegisterResult { Successful = SuccessfulEnum.Successful , Message = "ApplicationUserID is empty? looks like error" };
+			}
+
+			
 		}
 
 
 		[Authorize]
 		[HttpPost(WebApiAuthenticationAccounts.PostProfile)]
-		public async Task<ProfileResult> PostProfileAsync([FromBody]ProfileModel model)
+		public async Task<ProfileResult> PostProfileAsync([FromBody]ProfileModel profileModel)
 		{
-			if (model == null)
+			if (profileModel == null)
 			{
 				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful , Error = " ProfileModel is null " };
 			}
 
-			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);
+			if (string.IsNullOrWhiteSpace(profileModel.ID))
+			{
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User ID is empty " };
+			}
+		//	ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);
+			ApplicationUser user = await _userManager.FindByIdAsync(profileModel.ID);
 			if (user != null)
 			{
 				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful , Error = "Can't get user from db "  };
 			}
 
-			user.DataServerAddress = model.DataServerAddress != null ? model.DataServerAddress : "";
+			user.DataServerAddress = profileModel.DataServerAddress != null ? profileModel.DataServerAddress : "";
 			//user.DataServerPort = model.DataServerPort != null ? model.DataServerPort : "";
-			user.AccessKey = model.AccessKey != null ? model.AccessKey : "";
-			user.CustomerCode = model.CustomerCode != null ? model.CustomerCode : "";
-			user.BranchCode = model.BranchCode != null ? model.BranchCode : "";
-			user.InventorCode = model.InventorCode != null ? model.InventorCode : "";
-			user.DBPath = model.DBPath != null ? model.DBPath : "";
+			user.AccessKey = profileModel.AccessKey != null ? profileModel.AccessKey : "";
+			user.CustomerCode = profileModel.CustomerCode != null ? profileModel.CustomerCode : "";
+			user.BranchCode = profileModel.BranchCode != null ? profileModel.BranchCode : "";
+			user.InventorCode = profileModel.InventorCode != null ? profileModel.InventorCode : "";
+			user.DBPath = profileModel.DBPath != null ? profileModel.DBPath : "";
 			//first = person?.FirstName ?? "Unspecified";
 
 			var result = await _userManager.UpdateAsync(user);
@@ -153,8 +209,12 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			{
 				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "ProfileModel is null " };
 			}
-
-			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
+			if (string.IsNullOrWhiteSpace(profileModel.ID))
+			{
+				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User ID is empty " };
+			}
+			//ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);     
+			ApplicationUser user = await _userManager.FindByIdAsync(profileModel.ID);
 			if (user == null)
 			{
 				return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
@@ -185,6 +245,10 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 				if (claim.Type == ClaimEnum.DataServerAddress.ToString())
 				{
 					claims.Add(new Claim(ClaimEnum.DataServerAddress.ToString(), profileModel.DataServerAddress));
+				}
+				else if (claim.Type == ClaimEnum.ApplicationUserId.ToString())
+				{
+					claims.Add(new Claim(ClaimEnum.ApplicationUserId.ToString(), profileModel.ID));
 				}
 
 				//else if (claim.Type == ClaimEnum.DataServerPort.ToString())
@@ -242,12 +306,12 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		}
 
 		//===
-		//[Authorize]
+		[Authorize]
 		[HttpGet(WebApiAuthenticationAccounts.GetUser)]
 		public IActionResult GetUser()
 		{
-			if (User != null) return Ok(LoggedOutUser);
-			if (User.Identity != null) return Ok(LoggedOutUser);
+			if (User == null) return Ok(LoggedOutUser);
+			if (User.Identity == null) return Ok(LoggedOutUser);
 
 			if (User.Identity.IsAuthenticated)
 			{
@@ -263,54 +327,56 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			return Ok(LoggedOutUser);
 		}
 
-		[Authorize]
-		[HttpGet(WebApiAuthenticationAccounts.GetProfile)]
-		public IActionResult Profile()
-		{
-			if (User != null) return Ok(new ProfileModel());
-			if (User.Claims != null) return Ok(new ProfileModel());
+		//[Authorize]
+		//[HttpGet(WebApiAuthenticationAccounts.GetCurrentUserProfile)]		//NOT USE?		 вообще не то
+		//public async Task<IActionResult> Profile()
+		//{
+		//	if (User == null) return Ok(new ProfileModel());
+		//	if (User.Claims == null) return Ok(new ProfileModel());
+		//	if (User.Identity == null) return Ok(new ProfileModel());
+		//   ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);   
+		//	if (user == null) return Ok(new ProfileModel());
 
-			return Ok(new ProfileModel()
-			{
-				DataServerAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerAddress.ToString())?.Value,
-				//DataServerPort = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerPort.ToString())?.Value,
-				AccessKey = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.AccessKey.ToString())?.Value,
-				CustomerCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.CustomerCode.ToString())?.Value,
-				BranchCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.BranchCode.ToString())?.Value,
-				InventorCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.InventorCode.ToString())?.Value,
-				DBPath = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DBPath.ToString())?.Value
-				//Name = User.Identity.Name,
-				//Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
-				//ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
-			});
-		}
+		//	return Ok(new ProfileModel()
+		//	{
+				
+		//		ID = user.Id,
+		//		DataServerAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerAddress.ToString())?.Value,
+		//		//DataServerPort = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerPort.ToString())?.Value,
+		//		AccessKey = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.AccessKey.ToString())?.Value,
+		//		CustomerCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.CustomerCode.ToString())?.Value,
+		//		BranchCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.BranchCode.ToString())?.Value,
+		//		InventorCode = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.InventorCode.ToString())?.Value,
+		//		DBPath = User.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DBPath.ToString())?.Value
+		//		//Name = User.Identity.Name,
+		//		//Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+		//		//ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
+		//	});
+		//}
 
-		[Authorize]
-		[HttpPost(WebApiAuthenticationAccounts.PostChangePassword)]
-		public async Task<ChangePasswordResult> ChangePassword([FromBody]ChangePasswordModel changePasswordModel)
-		{
-			if (changePasswordModel == null)
-			{
-				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = "changePasswordModel is null " };
-			}
+	
 
-			ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
-			if (user == null)
-			{
-				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
-			}
-			var result = await _userManager.ChangePasswordAsync(user, changePasswordModel.OldPassword, changePasswordModel.NewPassword);
-            if (result.Succeeded == false)
-			{ 
-				var errors = result.Errors.Select(x => x.Description);
-				var error = string.Join(" ." , errors);
-				return new ChangePasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
-			}
-		    
-			await _signInManager.SignInAsync(user, isPersistent: false);
-            _logger.LogInformation("User changed their password successfully.");
-           return new ChangePasswordResult { Successful = SuccessfulEnum.Successful };
-
-		}
+		//[Authorize]
+		//[HttpPost(WebApiAuthenticationAccounts.DeleteUser)]
+  //      public async Task<IActionResult> Delete(string id) 
+		//{
+		//	ApplicationUser user = await _userManager.FindByEmailAsync(User.Identity.Name);      
+		//	if (user == null)
+		//	{
+		//		return new ProfileResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User is null " };
+		//	}
+  //          AppUser user = await userManager.FindByIdAsync(id);
+  //          if (user != null) {
+  //              IdentityResult result = await userManager.DeleteAsync(user);
+  //              if (result.Succeeded) {
+  //                  return RedirectToAction("Index");
+  //              } else {
+  //                  AddErrorsFromResult(result);
+  //              }
+  //          } else {
+  //              ModelState.AddModelError("", "User Not Found");
+  //          }
+  //          return View("Index", userManager.Users);
+  //      }
 	}
 }

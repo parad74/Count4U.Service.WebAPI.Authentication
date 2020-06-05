@@ -23,6 +23,7 @@ using System.IO;
 using Count4U.Service.Shared;
 using Monitor.Service.Model;
 using Service.Filter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Count4U.Service.Core.Server
 {
@@ -140,8 +141,20 @@ namespace Count4U.Service.Core.Server
 			{
 				config.AddPolicy(UserPolicy.IsAdmin, UserPolicy.IsAdminPolicy());
 				config.AddPolicy(UserPolicy.IsUser, UserPolicy.IsUserPolicy());
-				config.AddPolicy(UserPolicy.IsDeveloper, UserPolicy.IsDeveloperPolicy());
+				config.AddPolicy(UserPolicy.IsOwner, UserPolicy.IsOwnerPolicy());
+				config.AddPolicy(UserPolicy.IsManager, UserPolicy.IsManagerPolicy());
+				config.AddPolicy(UserPolicy.IsMonitor, UserPolicy.IsMonitorPolicy());
+				config.AddPolicy(UserPolicy.IsContext, UserPolicy.IsContextPolicy());
+				config.AddPolicy(UserPolicy.IsWorker, UserPolicy.IsWorkerPolicy());
+				config.AddPolicy(UserPolicy.IsProfile, UserPolicy.IsProfilePolicy());
+				config.AddPolicy(UserPolicy.HaveInventorCode, UserPolicy.HaveInventorCodePolicy());
 			});
+
+			//services.AddSingleton<IAuthorizationHandler, CanUseInventorHandler>();       //Регистрируем сам handler	 ??
+			//services.AddAuthorization(options =>
+			//{
+			//	options.AddPolicy(UserPolicy.HaveInventorCode, x => { x.RequireClaim(ClaimEnum.InventorCode.ToString() ); });
+			//});
 
 			//services.AddSingleton<IAuthorizationHandler, MinAgeHandler>();	   //Регистрируем сам handler
 
@@ -157,7 +170,7 @@ namespace Count4U.Service.Core.Server
 			//					  policy.RequireClaim("EmployeeNumber", "1", "2", "3", "4", "5"));			//список допустимыйх значений
 			//});
 
-            services.AddResponseCompression(opts =>
+			services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] { "application/octet-stream" });

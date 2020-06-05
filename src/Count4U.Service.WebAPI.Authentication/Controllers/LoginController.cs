@@ -23,6 +23,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
 	[ApiController]
 	[Produces("application/json")]
+	[Consumes("application/json")]
 	public class LoginController : ControllerBase
 	{
 		private readonly IConfiguration _configuration;
@@ -62,8 +63,8 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//1 шаг проверяем есть ли такой пользователь с таким паролем
 			//var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, false, false);
 			//if (!result.Succeeded) return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
-			ApplicationUser user = await _userManager.FindByEmailAsync(login.Email);
-			var correctuser = await _userManager.CheckPasswordAsync(user, login.Password);
+			ApplicationUser applicationUser = await _userManager.FindByEmailAsync(login.Email);
+			var correctuser = await _userManager.CheckPasswordAsync(applicationUser, login.Password);
 
 			//2 шаг - если нет отправляем неудачно, (надо на регистрацию отправлять если что)
 			if (correctuser == false)
@@ -76,14 +77,20 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//             new Claim(ClaimTypes.Name, login.Email)
 			//         };
 
-			var roles = await _signInManager.UserManager.GetRolesAsync(user);
 
 			var claims = new List<Claim>();
+			//ID 
+			claims.Add(new Claim(ClaimEnum.ApplicationUserId.ToString(), applicationUser.Id));
 			//имя пользователя
 			claims.Add(new Claim(ClaimTypes.Name, login.Email));
 
-
-
+			 var roles = await _signInManager.UserManager.GetRolesAsync(applicationUser);
+			
+			//роли пользователя
+			foreach (var role in roles)
+			{
+				claims.Add(new Claim(ClaimTypes.Role, role));
+			}
 			//ТЕСТ работает
 			//var have = claims.Any(c => c.Type == "manager");
 			//if (have == false) 
@@ -91,13 +98,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			//	await _signInManager.UserManager.AddClaimAsync(user, new Claim("manager", "full"));
 			//}
 
-			//роли пользователя
-			foreach (var role in roles)
-			{
-				claims.Add(new Claim(ClaimTypes.Role, role));
-			}
-
-
+		
 
 			//тестовый вариант все настройки из конфига
 			{
@@ -121,11 +122,10 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			}
 
 			{
-				ProfileModel profileModel = user.ToProfileModel();
+				ProfileModel profileModel = applicationUser.ToProfileModel();
 				if (profileModel != null)
 				{
 					claims.Add(new Claim(ClaimEnum.DataServerAddress.ToString(), profileModel.DataServerAddress));
-					//claims.Add(new Claim(ClaimEnum.DataServerPort.ToString(), profileModel.DataServerPort));
 					claims.Add(new Claim(ClaimEnum.AccessKey.ToString(), profileModel.AccessKey));
 					claims.Add(new Claim(ClaimEnum.CustomerCode.ToString(), profileModel.CustomerCode));
 					claims.Add(new Claim(ClaimEnum.BranchCode.ToString(), profileModel.BranchCode));
@@ -136,7 +136,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			}
 
 			//from AspNetUserClaims , аналог ролей
-			var userClaims = await _signInManager.UserManager.GetClaimsAsync(user);
+			var userClaims = await _signInManager.UserManager.GetClaimsAsync(applicationUser);
 			foreach (var userClaim in userClaims)
 			{
 				var have = claims.Any(c => c.Type == userClaim.Type);

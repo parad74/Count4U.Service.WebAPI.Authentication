@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
  using Count4U.Service.Shared;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Count4U.Service.Core.Server.Data
 {
@@ -28,6 +29,7 @@ namespace Count4U.Service.Core.Server.Data
 		public static ProfileModel ToProfileModel(this ApplicationUser user)
 		{
 			ProfileModel profileModel = new ProfileModel();
+			profileModel.ID = user.Id !=null ? user.Id : "";
 			profileModel.DataServerAddress = user.DataServerAddress !=null ? user.DataServerAddress : "";
 			//profileModel.DataServerPort = user.DataServerPort != null ? user.DataServerPort : "";
 			profileModel.AccessKey = user.AccessKey != null ? user.AccessKey : "";
@@ -38,17 +40,18 @@ namespace Count4U.Service.Core.Server.Data
 			return profileModel;
 		}
 
-		public static ProfileModel ToProfileModel(this ClaimsPrincipal user)
-		{
-			ProfileModel profileModel = new ProfileModel();
-			profileModel.DataServerAddress = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerAddress.ToString())?.Value;
-		//	profileModel.DataServerPort = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerPort.ToString())?.Value;
-			profileModel.AccessKey = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.AccessKey.ToString())?.Value;
-			profileModel.CustomerCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.CustomerCode.ToString())?.Value;
-			profileModel.BranchCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.BranchCode.ToString())?.Value;
-			profileModel.InventorCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.InventorCode.ToString())?.Value;
-			profileModel.DBPath = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DBPath.ToString())?.Value;
-			return profileModel;
-		}
+		//public static ProfileModel ToProfileModel(this ClaimsPrincipal user)
+		//{
+		//	ProfileModel profileModel = new ProfileModel();
+		//	//profileModel.ID =  user.Identity; ?? проблема надо рашить
+		//	profileModel.DataServerAddress = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerAddress.ToString())?.Value;
+		////	profileModel.DataServerPort = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DataServerPort.ToString())?.Value;
+		//	profileModel.AccessKey = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.AccessKey.ToString())?.Value;
+		//	profileModel.CustomerCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.CustomerCode.ToString())?.Value;
+		//	profileModel.BranchCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.BranchCode.ToString())?.Value;
+		//	profileModel.InventorCode = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.InventorCode.ToString())?.Value;
+		//	profileModel.DBPath = user.Claims.FirstOrDefault(c => c.Type == ClaimEnum.DBPath.ToString())?.Value;
+		//	return profileModel;
+		//}
 	}
 }

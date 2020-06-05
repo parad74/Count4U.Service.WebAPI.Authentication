@@ -15,6 +15,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 	[Authorize]
 	[ApiController]
 	[Produces("application/json")]
+	[Consumes("application/json")]
 	[ServiceFilter(typeof(ControllerTraceServiceFilter))]
 	public class ClaimController : ControllerBase
     {

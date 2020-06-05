@@ -17,17 +17,16 @@ namespace Count4U.Service.Core.Server.Data
 		{
 			base.OnModelCreating(builder);
 
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Owner", NormalizedName = "OWNER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
 			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			//builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Monitor", NormalizedName = "MONITOR", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //users and roles
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() }); //For all profiles, process, customers params
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Monitor", NormalizedName = "MONITOR", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //metriks 
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Context", NormalizedName = "CONTEXT", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });   //profile view
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Worker", NormalizedName = "WORKER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	   //Inventor in field
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Profile", NormalizedName = "PROFILE", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	  //my Profile Edit
 		}
-		//protected override void OnModelCreating(ModelBuilder builder)
-		//{
-		//	builder.Entity<ApplicationUser>().HasKey(p => p.Id);
 
-		//	base.OnModelCreating(builder);
-		//}
 	}
 
 
