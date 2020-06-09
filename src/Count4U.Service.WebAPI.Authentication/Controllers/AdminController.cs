@@ -184,9 +184,9 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
         //Заполняем форму редактирования 
         [HttpPost(WebApiAuthenticationAdmin.RoleWithUsers)]
-        public async Task<RoleEditModel> RoleWithUsers([FromBody] string roleId)
+        public async Task<RoleModel> RoleWithUsers([FromBody] string roleId)
         {
-            RoleEditModel result = new RoleEditModel();
+            RoleModel result = new RoleModel();
             try
             {
                 IdentityRole role = await _roleManager.FindByIdAsync(roleId);
@@ -199,7 +199,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
                     list.Add(new UserViewModel { UserID = user.Id, Email = user.Email });
                 }
 
-                result = new RoleEditModel
+                result = new RoleModel
                 {
                     RoleID = roleId,
                     RoleName = role.Name,
@@ -216,41 +216,59 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
 
         [HttpPost(WebApiAuthenticationAdmin.UpdateUsersInRole)]
-        public async Task<List<RoleModificationResult>> UpdateUsersInRole([FromBody] RoleModificationModel model)
+        public async Task<RoleResult> UpdateUsersInRole([FromBody] RoleModel roleModel)
         {
-            List<RoleModificationResult> resultError = new List<RoleModificationResult>();
+            List<RoleModificationResult>  resultError = new List<RoleModificationResult>();
+        	if (roleModel == null)
+			{
+				return new RoleResult { Successful = SuccessfulEnum.NotSuccessful, Error = "RoleModel is null " };
+			}
+
             IdentityResult result;
             //IdsToAdd из UI
-            foreach (string userId in model.IdsToAdd ?? new string[] { })
+            //foreach (string userId in model.IdsToAdd ?? new string[] { })
+            foreach (UserViewModel userMember in roleModel.NonMembers)
             {
-                ApplicationUser user = await _userManager.FindByIdAsync(userId);
-                if (user != null)
+                if (userMember.ToAdd == true)
                 {
-                    result = await _userManager.AddToRoleAsync(user, model.RoleName);
-                    if (!result.Succeeded)
+                    ApplicationUser user = await _userManager.FindByIdAsync(userMember.UserID);
+                    if (user != null)
                     {
-                        resultError.Add(AddErrorsFromResult(result, model.RoleId, userId));
+                        result = await _userManager.AddToRoleAsync(user, roleModel.RoleName);
+                        if (!result.Succeeded)
+                        {
+                            resultError.Add(AddErrorsFromResult(result, roleModel.RoleID, userMember.UserID));
+                        }
                     }
                 }
             }
             //IdsToDelete из UI
-            foreach (string userId in model.IdsToDelete ?? new string[] { })
+            // foreach (string userId in model.IdsToDelete ?? new string[] { })
+            foreach (UserViewModel userMember in roleModel.Members)
             {
-                ApplicationUser user = await _userManager.FindByIdAsync(userId);
-                if (user != null)
+                if (userMember.ToDelete == true)
                 {
-                    result = await _userManager.RemoveFromRoleAsync(user, model.RoleName);
-                    if (!result.Succeeded)
+                    ApplicationUser user = await _userManager.FindByIdAsync(userMember.UserID);
+                    if (user != null)
                     {
-                        resultError.Add(AddErrorsFromResult(result, model.RoleId, userId));
+                        result = await _userManager.RemoveFromRoleAsync(user, roleModel.RoleName);
+                        if (!result.Succeeded)
+                        {
+                            resultError.Add(AddErrorsFromResult(result, roleModel.RoleID, userMember.UserID));
+                        }
                     }
                 }
             }
+
+
             if (resultError.Count == 0)
             {
-                resultError.Add(new RoleModificationResult { Successful = SuccessfulEnum.Successful });
+                return new RoleResult { Successful = SuccessfulEnum.Successful };
             }
-            return resultError;
+            else
+            {
+                return new RoleResult { Successful = SuccessfulEnum.Successful };
+            }
         }
 
         [NonAction]
