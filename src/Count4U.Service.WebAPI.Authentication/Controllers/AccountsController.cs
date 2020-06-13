@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Monitor.Service.Model;
 using Monitor.Service.Urls;
  using Count4U.Service.Shared;
+using Monitor.Service.Shared;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -32,11 +33,13 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<AccountsController> _logger;
+	
 
 		public AccountsController(ILoggerFactory loggerFactory
 			, IConfiguration configuration
 			, UserManager<ApplicationUser> userManager
 			, SignInManager<ApplicationUser> signInManager
+		
 		)
 		{
 			this._logger = loggerFactory.CreateLogger<AccountsController>();
@@ -46,7 +49,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 							  throw new ArgumentNullException(nameof(userManager));
 			this._signInManager = signInManager ??
 							  throw new ArgumentNullException(nameof(signInManager));
-
+		
 		}
 
 		[AllowAnonymous]

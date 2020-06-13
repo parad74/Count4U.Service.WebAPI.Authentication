@@ -18,6 +18,8 @@ using Count4U.Service.Common.Filter.ActionFilterFactory;
 using Monitor.Service.Urls;
 using Monitor.Service.Model;
  using Count4U.Service.Shared;
+using Monitor.Service.Shared;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -30,11 +32,13 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly ILogger<LoginController> _logger;
+		private readonly IEmailSender _emailSender;
 
-		public LoginController(ILoggerFactory loggerFactory,
-			IConfiguration configuration,
-			SignInManager<ApplicationUser> signInManager,
-			UserManager<ApplicationUser> userManager)
+		public LoginController(ILoggerFactory loggerFactory
+			, IConfiguration configuration
+			, SignInManager<ApplicationUser> signInManager
+			, UserManager<ApplicationUser> userManager
+			, IEmailSender emailSender)
 		{
 			this._logger = loggerFactory.CreateLogger<LoginController>();
 			_configuration = configuration ??
@@ -43,6 +47,8 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 							  throw new ArgumentNullException(nameof(userManager));
 			_signInManager = signInManager ??
 							  throw new ArgumentNullException(nameof(signInManager));
+				this._emailSender = emailSender ??
+							  throw new ArgumentNullException(nameof(emailSender));
 		}
 
 		//The sole job of the login controller is to verify the username and password in the LoginModel using the ASP.NET Core Identity SignInManger.
@@ -166,59 +172,45 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			return new LoginResult { Successful = SuccessfulEnum.Successful, Token = new JwtSecurityTokenHandler().WriteToken(token) };
 		}
 
-		//[HttpPost]
-		//[AllowAnonymous]
+
+	
+
+	
+	
+
+		
+		//	var callbackUrl = Url.Action("ResetPassword", nameof(UtilController), new ResetPasswordModel{Code= token, Email = user.Email }, Request.Scheme);
+			//var callbackUrl = Url.Action("ResetPassword", "Util", new { userId = user.Email, code = token }, protocol: HttpContext.Request.Scheme);
+			//var callbackUrl = Url.Action(nameof(ResetPassword), "Util", new { token, email = user.Email }, Request.Scheme);
+			//var message = new EmailMessage(new string[] { model.Email}, "Reset password token", passwordResetUrl, null);
+			//await _emailSender.SendEmailAsync(message);
+
+
+				//passwordResetUrl = navigationManager.BaseUri;
+      //         passwordResetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+      //         string passwordResetToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+      //         string passwordResetUrl = "https://localhost:27027/ResetPassword?email=" + user.Email + "&token=" + passwordResetToken;
+	
+
+
+		//	[HttpPost]
 		//[ValidateAntiForgeryToken]
-		//public async Task<LoginResult> ForgotPassword(ForgotPasswordModel model)
+		//public async Task<IActionResult> ForgotPassword(ForgotPasswordModel forgotPasswordModel)
 		//{
+		//    if (!ModelState.IsValid)
+		//        return View(forgotPasswordModel);
 
-		//	var user = await _userManager.FindByEmailAsync(model.Email);
-		//	if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-		//	{
-		//		// пользователь с данным email может отсутствовать в бд
-		//		// тем не менее мы выводим стандартное сообщение, чтобы скрыть 
-		//		// наличие или отсутствие пользователя в бд
-		//		return new LoginResult { Successful = SuccessfulEnum.ForgotPassword, Error = "Forgot Password Confirmation. " };
-		//	}
+		//    var user = await _userManager.FindByEmailAsync(forgotPasswordModel.Email);
+		//    if (user == null)
+		//        return RedirectToAction(nameof(ForgotPasswordConfirmation));
 
-		//	var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-		//	var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-		//	EmailService emailService = new EmailService();
-		//	await emailService.SendEmailAsync(model.Email, "Reset Password",
-		//		$"To reset your password, follow the link: <a href='{callbackUrl}'>link</a>");
-		//	return new LoginResult { Successful = SuccessfulEnum.ForgotPassword, Error = "Forgot Password Confirmation. " };
+		//    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+		//    var callback = Url.Action(nameof(ResetPassword), nameof(AccountController), new { token, email = user.Email }, Request.Scheme);
 
-		//}
+		//    var message = new Message(new string[] { "codemazetest@gmail.com" }, "Reset password token", callback, null);
+		//    await _emailSender.SendEmailAsync(message);
 
-		//[HttpGet]
-		//[AllowAnonymous]
-		//public LoginResult ResetPassword(string code = null)
-		//{
-		//	if (code == null) return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "Error Reset Password" };
-		//	return new LoginResult { Successful = SuccessfulEnum.Successful };
-		//}
-
-		//[HttpPost]
-		//[AllowAnonymous]
-		//[ValidateAntiForgeryToken]
-		//public async Task<LoginResult> ResetPassword(ResetPasswordModel model)
-		//{
-		//	var user = await _userManager.FindByEmailAsync(model.Email);
-		//	if (user == null)
-		//	{
-		//		return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = "User not found" };
-		//	}
-		//	var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
-		//	if (result.Succeeded)
-		//	{
-		//		return new LoginResult { Successful = SuccessfulEnum.Successful };
-		//	}
-		//	string error = "";
-		//	foreach (var err in result.Errors)
-		//	{
-		//		error += err.Description;
-		//	}
-		//	return new LoginResult { Successful = SuccessfulEnum.NotSuccessful, Error = error };
+		//    return RedirectToAction(nameof(ForgotPasswordConfirmation));
 		//}
 	}
 }

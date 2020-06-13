@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Monitor.Service.Model;
 using Monitor.Service.Urls;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
@@ -25,6 +27,10 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 			return PingOpetarion.Pong;
 		}
 
+
+
+
+	
 		//[Authorize]
 		//[HttpGet("claims")]
 		//public object Claims()

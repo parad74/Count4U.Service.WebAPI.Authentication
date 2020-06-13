@@ -24,6 +24,11 @@ using Count4U.Service.Shared;
 using Monitor.Service.Model;
 using Service.Filter;
 using Microsoft.AspNetCore.Authorization;
+using Monitor.Service.Shared;
+using Monitor.Service.Shared.Settings;
+using Microsoft.Extensions.Options;
+using Monitor.Service.Model.Settings;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Count4U.Service.Core.Server
 {
@@ -46,6 +51,8 @@ namespace Count4U.Service.Core.Server
 
 			services.AddDistributedMemoryCache();      //https://metanit.com/sharp/aspnet5/2.11.php
 			services.AddSession();
+
+			
 
 			services.AddHttpContextAccessor();   // вы можете запросить объект IHttpContextAccessor в конструкторе. Хотя объект IHttpContextAccessor не имеет свойства User, он дает вам доступ к объекту HttpContext, который имеет свойство User. 
 
@@ -98,7 +105,7 @@ namespace Count4U.Service.Core.Server
 			//Setting up ApplicationDbContext
 			services.AddDbContext<ApplicationDbContext>(options =>
 			options.UseSqlite(@"Data Source=App_Data\userc4u.db"));
-			//options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+		//	options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 	   			services.AddDefaultIdentity<ApplicationUser>(opts => {    //TODO добавить свой класс наследник от 	IdentityUser и add IdentityRole	   services.AddDefaultIdentity<IdentityUser, IdentityRole>()  
 				opts.Password.RequiredLength = 5;   // минимальная длина
 				opts.Password.RequireNonAlphanumeric = false;   // требуются ли не алфавитно-цифровые символы
@@ -180,6 +187,26 @@ namespace Count4U.Service.Core.Server
 			// Add functionality to inject IOptions<T>
 			services.AddOptions();    //			добавляет базовую поддержку для внедрения IOptions<T>объектов на основе в ваш код, заполненный данными конфигурации из магазина.Затем вы регистрируете свой фактический класс конфигурации и сопоставляете его с разделом конфигурации, который он должен использовать для чтения данных.
 		
+
+			services.Configure<EmailSettings>(this.Configuration.GetSection("EmailSettings"));
+			// Explicitly register the settings object so IOptions not required (optional)
+			services.AddSingleton(resolver =>
+				resolver.GetRequiredService<IOptions<EmailSettings>>().Value);            //IOptionsSnapshot
+																						   // Register as an IValidatable
+			services.AddSingleton<IValidatable>(resolver =>
+				resolver.GetRequiredService<IOptions<EmailSettings>>().Value);
+
+			services.AddSingleton<IEmailSettings>(resolver =>
+				resolver.GetRequiredService<IOptions<EmailSettings>>().Value);
+			
+			services.AddScoped<IEmailSender, EmailSender>();
+
+            services.Configure<FormOptions>(o => {
+                o.ValueLengthLimit = int.MaxValue;
+                o.MultipartBodyLengthLimit = int.MaxValue;
+                o.MemoryBufferThreshold = int.MaxValue;
+            });
+
 			//services.AddTransient<HubConnectionBuilder>();
 			// Включаем ведение журнала для распространенных ошибок 400 неверных запросов 
 			services.EnableLoggingForBadRequests();
@@ -210,6 +237,9 @@ namespace Count4U.Service.Core.Server
 			});
 
 			app.UseRouting();
+			//app.UseHttpsRedirection();
+   //         app.UseStaticFiles();
+
 			app.UseCors(policy =>
 			policy.AllowAnyOrigin() //WithOrigins("http://localhost:5000", "http://localhost:27515"
 			.AllowAnyMethod()
@@ -247,15 +277,9 @@ namespace Count4U.Service.Core.Server
 			services.AddScoped<ControllerTraceServiceFilter>();
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			services.AddScoped<IPCBIContext, PCBIContext>();
-			services.AddScoped<IEmailSender, EmailSender>();
-		
-
-			//services.AddScoped<IWeatherForecastWebApi, WeatherForecastWebApi>();
-
 
 			services.AddControllers()
 				.AddControllersAsServices(); // Add the controllers to DI
-
 		}
 
 		private void OnAppStopped()

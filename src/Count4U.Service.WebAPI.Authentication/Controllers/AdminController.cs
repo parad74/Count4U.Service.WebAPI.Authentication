@@ -11,6 +11,7 @@ using System;
 using Monitor.Service.Model;
 using Monitor.Service.Urls;
 using System.Collections.Generic;
+using Monitor.Service.Shared;
 
 namespace Count4U.Service.WebAPI.Authentication.Controllers
 {
@@ -26,6 +27,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AccountsController> _logger;
+        private readonly IEmailSender _emailSender;
         //private IUserValidator<ApplicationUser> userValidator;
         //private IPasswordValidator<ApplicationUser> passwordValidator;
         //private IPasswordHasher<ApplicationUser> passwordHasher;
@@ -35,6 +37,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
             , UserManager<ApplicationUser> userManager
             , RoleManager<IdentityRole> roleManager
             , SignInManager<ApplicationUser> signInManager
+            , IEmailSender emailSender
             //, IUserValidator<ApplicationUser> userValid
             //, IPasswordValidator<ApplicationUser> passValid
             //, IPasswordHasher<ApplicationUser> passwordHash
@@ -49,6 +52,8 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
                             throw new ArgumentNullException(nameof(roleManager));
             this._signInManager = signInManager ??
                             throw new ArgumentNullException(nameof(signInManager));
+			this._emailSender = emailSender ??
+							  throw new ArgumentNullException(nameof(emailSender));
         }
 
         //public ViewResult Index() => View(_userManager.Users);
@@ -69,7 +74,7 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
             }
 
             ApplicationUser user = await _userManager.FindByIdAsync(deleteModel.ApplicationUserID);
-            if (user != null)
+            if (user == null)
             {
                 return new DeleteResult { Successful = SuccessfulEnum.NotSuccessful, Error = "Can't get user from db " };
             }
@@ -125,10 +130,67 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
 
         }
 
+       	[HttpPost(WebApiAuthenticationAdmin.ForgotPassword)]
+		public async Task<ForgotPasswordResult> ForgotPassword([FromBody]ForgotPasswordModel forgotPasswordModel)
+		{
+            if (forgotPasswordModel == null)
+            {
+               	return new ForgotPasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error ="can't find user by email" };
+            }
+
+            ApplicationUser user = null;
+            if (string.IsNullOrWhiteSpace(forgotPasswordModel.ApplicationUserID) == false)
+            {
+                user = await _userManager.FindByIdAsync(forgotPasswordModel.ApplicationUserID);           //try by ID first
+            }
+
+            if (user == null)
+            {
+                if (string.IsNullOrWhiteSpace(forgotPasswordModel.Email) == false)
+                {
+                    user = await _userManager.FindByEmailAsync(forgotPasswordModel.Email);
+                }
+            }
+
+            if (user == null)
+            {
+                	return new ForgotPasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error ="can't find user" };
+            }
+            try
+            {
+                if (string.IsNullOrWhiteSpace(forgotPasswordModel.NewPassword) == true)
+                    forgotPasswordModel.NewPassword = RandomGenerator.RandomString(6, true);
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, forgotPasswordModel.NewPassword);
+                if (result.Succeeded)
+                {
+                     string content = $"Hello {user.Email}, <br> Your password was changed to new : <br> <p> {user.Email} </p><p> {forgotPasswordModel.NewPassword} </p>";
+           			var message = new EmailMessage(new string[] {user.Email }, "Password changed", content, null);
+					await _emailSender.SendEmailAsync(message);
+					return new ForgotPasswordResult { Successful = SuccessfulEnum.Successful, Token = token, Email = user.Email };
+                }
+                else
+                {
+                    string errorResult = "";
+                    foreach (var error in result.Errors)
+                    {
+                       errorResult +=  error.Description + "; " ;
+                    }
+                    return new ForgotPasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = errorResult};
+                }
+            }
+            catch (Exception exc)
+            {
+                return new ForgotPasswordResult { Successful = SuccessfulEnum.NotSuccessful, Error = exc.Message };
+            }
+
+		}
+        
         // ===================== User ========================
         [HttpGet(WebApiAuthenticationAdmin.GetUsers)]
         public async Task<List<UserViewModel>> GetUsers()
         {
+
             List<UserViewModel> result = new List<UserViewModel>();
             try
             {
@@ -145,6 +207,36 @@ namespace Count4U.Service.WebAPI.Authentication.Controllers
                 return result;
             }
             return result;
+        }
+
+         [HttpPost(WebApiAuthenticationAdmin.GetUserWithPassword)]
+        public async Task<UserWithPasswordModel> GetUserWithPassword([FromBody] UserWithPasswordModel userWithPasswordModel)
+        {
+
+             if (userWithPasswordModel == null)
+            {
+                return userWithPasswordModel;
+            }
+            ApplicationUser user = null;
+            if (string.IsNullOrWhiteSpace(userWithPasswordModel.ApplicationUserID) == false)
+            {
+                user = await _userManager.FindByIdAsync(userWithPasswordModel.ApplicationUserID);           //try by ID first
+            }
+
+            if (user == null)
+            {
+                if (string.IsNullOrWhiteSpace(userWithPasswordModel.Email) == false)
+                {
+                    user = await _userManager.FindByEmailAsync(userWithPasswordModel.Email);
+                }
+            }
+
+            if (user == null)
+            {
+                return userWithPasswordModel;
+            }
+
+            return userWithPasswordModel;
         }
 
         // ==================  Role   ========================
