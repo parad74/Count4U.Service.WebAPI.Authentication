@@ -21,9 +21,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
 using Count4U.Service.Shared;
-using Monitor.Service.Model;
 using Service.Filter;
-using Microsoft.AspNetCore.Authorization;
 using Monitor.Service.Shared;
 using Monitor.Service.Shared.Settings;
 using Microsoft.Extensions.Options;
@@ -103,6 +101,11 @@ namespace Count4U.Service.Core.Server
      //   options.UseSqlite("Data Source=userc4u.db"));
 
 			//Setting up ApplicationDbContext
+			 //services.AddDbContext<ApplicationDbContext>(options =>  
+    //        {  
+    //            // for in memory database  
+    //            options.UseInMemoryDatabase("MemoryBaseDataBase");  
+    //        });  
 			services.AddDbContext<ApplicationDbContext>(options =>
 			options.UseSqlite(@"Data Source=App_Data\userc4u.db"));
 		//	options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));

@@ -2,29 +2,49 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection;
 
 namespace Count4U.Service.Core.Server.Data
 {
-	
-	public class ApplicationDbContext : IdentityDbContext  <ApplicationUser>
+
+	public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
-			Database.EnsureCreated();
+			//Database.EnsureCreated();
 		}
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
 
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Owner", NormalizedName = "OWNER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //users and roles
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Manager", NormalizedName = "MANAGER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() }); //For all profiles, process, customers params
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Monitor", NormalizedName = "MONITOR", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });  //metriks 
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Context", NormalizedName = "CONTEXT", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });   //profile view
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Worker", NormalizedName = "WORKER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	   //Inventor in field
-			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Profile", NormalizedName = "PROFILE", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });	  //my Profile Edit
+			//This will pick up all configurations that are defined in the assembly
+			//builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+			//Instead of this:
+			builder.ApplyConfiguration(new RoleConfiguration());
+			builder.ApplyConfiguration(new AdminConfiguration());
+			builder.ApplyConfiguration(new AdminWithRolesConfig());
+			builder.ApplyConfiguration(new ManagerConfiguration());
+			builder.ApplyConfiguration(new ManagerWithRolesConfig());
+
+			//	string OwnerId = "799e3d1d-febd-4bd4-9c1f-26afd13bb0c9";
+			//	string UserId = "c401dbc0-080b-4fbe-a8a1-275cd4068eb7";
+			//	string AdminId = "5f998083-c061-4f3a-9589-7aeedaa306c8";
+			//	string ManagerId = "a3f5048f-55a8-4766-b8ec-03f859b8c399";
+			//	string MonitorId = "0ccc4920-47aa-4b34-acf8-77f5e0ad6c40";
+			//	string ContextId = "9e8f096e-c230-4917-b412-f0a5e403c499";
+			//	string WorkerId = "a87b2288-7534-458d-b4f6-4831239f8570";
+			//	string ProfileId = "38539cf9-77e9-4129-b6a6-9cfbbf3c64ac";
+
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = OwnerId, Name = "Owner", NormalizedName = "OWNER", ConcurrencyStamp = Guid.NewGuid().ToString() });
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = UserId, Name = "User", NormalizedName = "USER", ConcurrencyStamp = Guid.NewGuid().ToString() });
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = AdminId, Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = Guid.NewGuid().ToString() });  //users and roles
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = ManagerId, Name = "Manager", NormalizedName = "MANAGER", ConcurrencyStamp = Guid.NewGuid().ToString() }); //For all profiles, process, customers params
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = MonitorId, Name = "Monitor", NormalizedName = "MONITOR", ConcurrencyStamp = Guid.NewGuid().ToString() });  //metriks 
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = ContextId, Name = "Context", NormalizedName = "CONTEXT", ConcurrencyStamp = Guid.NewGuid().ToString() });   //profile view
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = WorkerId, Name = "Worker", NormalizedName = "WORKER",  ConcurrencyStamp = Guid.NewGuid().ToString() });      //Inventor in field
+			//	builder.Entity<IdentityRole>().HasData(new IdentityRole { Id = ProfileId, Name = "Profile", NormalizedName = "PROFILE", ConcurrencyStamp = Guid.NewGuid().ToString() });      //my Profile Edit
 		}
 
 	}
